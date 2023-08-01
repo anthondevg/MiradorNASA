@@ -1,15 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-export const RoverPicker = () => {
-  enum roverEnum {
-    curiosity = "curiosity",
-    opportunity = "opportunity",
-    spirit = "spirit",
-  }
-  const [rover, setRover] = useState<roverEnum>(roverEnum.curiosity);
-  useEffect(() => {
-    console.log(rover);
-  }, [rover]);
+export const RoverPicker = ({ handleRoverSelect, rover, roverEnum }: any) => {
   return (
     <div className="md:flex p-2 justify-between w-">
       <button
@@ -17,14 +8,14 @@ export const RoverPicker = () => {
           roverEnum.curiosity === rover ? "bg-[#105BD8]" : "bg-gray-800"
         }`}
         onClick={() => {
-          setRover(roverEnum.curiosity);
+          handleRoverSelect(roverEnum.curiosity);
         }}
       >
         CURIOSITY
       </button>
       <button
         onClick={() => {
-          setRover(roverEnum.opportunity);
+          handleRoverSelect(roverEnum.opportunity);
         }}
         className={`p-4  w-full rounded mr-4 hover:bg-blue-800 font-bold text-3xl ${
           roverEnum.opportunity === rover ? "bg-[#105BD8]" : "bg-gray-800"
@@ -34,7 +25,7 @@ export const RoverPicker = () => {
       </button>
       <button
         onClick={() => {
-          setRover(roverEnum.spirit);
+          handleRoverSelect(roverEnum.spirit);
         }}
         className={`p-4  w-full rounded mr-4 hover:bg-blue-800 font-bold text-3xl ${
           roverEnum.spirit === rover ? "bg-[#105BD8]" : "bg-gray-800"

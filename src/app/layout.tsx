@@ -19,7 +19,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={montserrat.className}>{children}</body>
+      <body className={montserrat.className}>
+        <div className="flex min-h-screen flex-col items-center justify-between p-2">
+          <div className="z-10 md:w-full md:max-w-7xl font-mono">
+            {children}{" "}
+          </div>
+        </div>
+      </body>
     </html>
   );
 }
