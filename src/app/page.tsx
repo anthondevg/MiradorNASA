@@ -10,6 +10,7 @@ import { DatePicker } from "./components/DatePicker";
 import { Input } from "./components/Input";
 import fetchAPI from "./utils/fetch";
 import { SkeletonPhoto } from "./components/SkeletonPhoto";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 export const Home = () => {
   const [rover, setRover] = useState<roverEnum>(roverEnum.curiosity);
@@ -18,10 +19,10 @@ export const Home = () => {
     timeCriteriaEnum.earthDate
   );
   const [photos, setPhotos] = useState([]) as Array<any>;
-  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [loadingScroll, setLoadingScroll] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
   const handleRoverSelect = (rover: any) => {
     setRover(rover);
   };
@@ -34,71 +35,61 @@ export const Home = () => {
   const handleTime = (date: any) => {
     setTime(date);
   };
-  useEffect(() => {
-    console.log("use effect");
-    fetchDataSearch();
-  }, []);
 
   const [time, setTime] = useState(
     new Date(new Date().setDate(new Date().getDate() - 2))
       .toISOString()
       .slice(0, 10)
   );
+  useEffect(() => {
+    console.log("use effect");
+    fetchData(false);
+  }, []);
+  const fetchData = async (infiniteScroll: boolean) => {
+    if (infiniteScroll) {
+      const fetchedPhotos = await fetchAPI(
+        `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/photos?page=${page}&${timeCriteria}=${time}${
+          camera !== "" ? `&camera=${camera}` : ""
+        }`
+      );
+      setPhotos((prevPhotos: any) => [...prevPhotos, ...fetchedPhotos]);
+      setPage(page + 1);
+      if (fetchedPhotos.length === 0 || fetchedPhotos === undefined) {
+        setHasMore(false);
+      }
+    } else {
+      setLoading(true);
+      setPage(1);
+      const fetchedPhotos = await fetchAPI(
+        `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/photos?page=${page}&${timeCriteria}=${time}${
+          camera !== "" ? `&camera=${camera}` : ""
+        }`
+      );
+      setPhotos(fetchedPhotos);
+      if (fetchedPhotos.length === 0 || fetchedPhotos === undefined) {
+        setHasMore(false);
+      }
+    }
 
-  const fetchDataScroll = async () => {
-    setLoadingScroll(true);
-
-    const fetchedPhotos = await fetchAPI(
-      `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/photos?${timeCriteria}=${time}${
-        camera !== "" ? `&camera=${camera}` : ""
-      }&page=${page}`
-    );
-
-    setPhotos((prevPhotos: any) => [...prevPhotos, ...fetchedPhotos]);
-    setPage((prevPage) => prevPage + 1);
-    setLoadingScroll(false);
-  };
-
-  const fetchDataSearch = async () => {
-    setLoading(true);
-    setPage(1);
-    let fetchedPhotos = await fetchAPI(
-      `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/photos?${timeCriteria}=${time}${
-        camera !== "" ? `&camera=${camera}` : ""
-      }&page=${page}`
-    );
-    setPhotos(fetchedPhotos);
     setLoading(false);
   };
+
   const handleScroll = () => {
     const position = window.scrollY;
     setScrollPosition(position);
-
-    if (
-      window.innerHeight + document.documentElement.scrollTop !==
-        document.documentElement.offsetHeight ||
-      loadingScroll
-    ) {
-      return;
-    }
-    fetchDataScroll();
   };
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
-      console.log("cleaner");
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [loadingScroll]);
-
+  }, []);
   return (
     <div>
       <div>
         <Navbar />
-        <span className="font-bold text-lg mr-2">
-          Hello! Select your Rover and start watching Mars photos 🚀
-        </span>
+
         <div>
           <RoverPicker
             handleRoverSelect={handleRoverSelect}
@@ -129,7 +120,7 @@ export const Home = () => {
             <span> | </span>
             <Button
               onClick={() => {
-                fetchDataSearch();
+                fetchData(false);
               }}
             >
               Search
@@ -137,8 +128,19 @@ export const Home = () => {
           </div>
         </div>
       </div>
-      <Photos photos={photos} loading={loading} />
-      {loadingScroll && <SkeletonPhoto />}
+      <InfiniteScroll
+        dataLength={photos.length}
+        next={() => fetchData(true)}
+        hasMore={hasMore}
+        loader={<SkeletonPhoto />}
+        endMessage={
+          <p className="font-bold text-white text-2xl">
+            <b>No photos.</b>
+          </p>
+        }
+      >
+        <Photos photos={photos} loading={loading} />
+      </InfiniteScroll>
     </div>
   );
 };

@@ -22,7 +22,6 @@ export const PhotoCard = ({ photo }: any) => {
             <p className="text-md font-bold text-gray-500">
               Date {photo.earth_date}
             </p>
-            <p className="text-md font-bold text-gray-500">Date {photo.id}</p>
           </div>
         </div>
         <div></div>
