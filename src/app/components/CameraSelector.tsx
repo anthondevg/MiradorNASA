@@ -16,7 +16,7 @@ export const CameraSelector = ({
         <option value={""}>All</option>
         {roverData[rover].map((camera: cameraType, i: number) => (
           <option key={i} value={camera.name}>
-            {camera.fullName}
+            {camera.name}
           </option>
         ))}
       </select>

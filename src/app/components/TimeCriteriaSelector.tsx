@@ -8,7 +8,7 @@ export const TimeCriteriaSelector = ({
 }: any) => {
   return (
     <div
-      className="flex ml-4 items-center hover:cursor-pointer"
+      className="flex ml-4 items-center hover:cursor-pointer timeCriteria"
       onClick={() => {
         handleCriteria(
           timeCriteriaEnum.earthDate === timeCriteria

@@ -11,18 +11,21 @@ import { Input } from "./components/Input";
 import fetchAPI from "./utils/fetch";
 import { SkeletonPhoto } from "./components/SkeletonPhoto";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { roverEnum, timeCriteriaEnum } from "./utils/enum";
+import { getYesterday } from "./utils/date";
 
 export const Home = () => {
   const [rover, setRover] = useState<roverEnum>(roverEnum.curiosity);
   const [camera, setCamera] = useState("");
   const [timeCriteria, setTimeCriteria] = useState<timeCriteriaEnum>(
-    timeCriteriaEnum.earthDate
+    timeCriteriaEnum.sol
   );
   const [photos, setPhotos] = useState([]) as Array<any>;
   const [loading, setLoading] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+
   const handleRoverSelect = (rover: any) => {
     setRover(rover);
   };
@@ -36,35 +39,27 @@ export const Home = () => {
     setTime(date);
   };
 
-  const [time, setTime] = useState(
-    new Date(new Date().setDate(new Date().getDate() - 2))
-      .toISOString()
-      .slice(0, 10)
-  );
+  const [time, setTime] = useState(getYesterday());
+
   useEffect(() => {
-    console.log("use effect");
+    // no infinite scroll on first load
     fetchData(false);
   }, []);
+
   const fetchData = async (infiniteScroll: boolean) => {
     if (infiniteScroll) {
-      const fetchedPhotos = await fetchAPI(
-        `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/photos?page=${page}&${timeCriteria}=${time}${
-          camera !== "" ? `&camera=${camera}` : ""
-        }`
-      );
+      // infinite scroll fetching
+      const fetchedPhotos = await requestAPI();
       setPhotos((prevPhotos: any) => [...prevPhotos, ...fetchedPhotos]);
       setPage(page + 1);
       if (fetchedPhotos.length === 0 || fetchedPhotos === undefined) {
         setHasMore(false);
       }
     } else {
+      // search button fetching
       setLoading(true);
       setPage(1);
-      const fetchedPhotos = await fetchAPI(
-        `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/photos?page=${page}&${timeCriteria}=${time}${
-          camera !== "" ? `&camera=${camera}` : ""
-        }`
-      );
+      const fetchedPhotos = await requestAPI();
       setPhotos(fetchedPhotos);
       if (fetchedPhotos.length === 0 || fetchedPhotos === undefined) {
         setHasMore(false);
@@ -73,7 +68,14 @@ export const Home = () => {
 
     setLoading(false);
   };
-
+  const requestAPI = async () => {
+    const fetchedPhotos = await fetchAPI(
+      `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/photos?page=${page}&${timeCriteria}=${time}${
+        camera !== "" ? `&camera=${camera}` : ""
+      }`
+    );
+    return fetchedPhotos;
+  };
   const handleScroll = () => {
     const position = window.scrollY;
     setScrollPosition(position);
@@ -135,7 +137,7 @@ export const Home = () => {
         loader={<SkeletonPhoto />}
         endMessage={
           <p className="font-bold text-white text-2xl">
-            <b>No photos.</b>
+            <b>No more photos.</b>
           </p>
         }
       >
@@ -146,13 +148,3 @@ export const Home = () => {
 };
 
 export default Home;
-
-enum timeCriteriaEnum {
-  earthDate = "earth_date",
-  sol = "sol",
-}
-enum roverEnum {
-  curiosity = "curiosity",
-  opportunity = "opportunity",
-  spirit = "spirit",
-}
