@@ -21,7 +21,6 @@ export const Home = () => {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [loadingScroll, setLoadingScroll] = useState(false);
-
   const [scrollPosition, setScrollPosition] = useState(0);
   const handleRoverSelect = (rover: any) => {
     setRover(rover);
@@ -35,43 +34,46 @@ export const Home = () => {
   const handleTime = (date: any) => {
     setTime(date);
   };
+  useEffect(() => {
+    console.log("use effect");
+    fetchDataSearch();
+  }, []);
 
   const [time, setTime] = useState(
-    new Date(new Date().setDate(new Date().getDate() - 1))
+    new Date(new Date().setDate(new Date().getDate() - 2))
       .toISOString()
       .slice(0, 10)
   );
 
   const fetchDataScroll = async () => {
     setLoadingScroll(true);
+
     const fetchedPhotos = await fetchAPI(
-      rover,
-      camera,
-      timeCriteria,
-      time,
-      page
+      `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/photos?${timeCriteria}=${time}${
+        camera !== "" ? `&camera=${camera}` : ""
+      }&page=${page}`
     );
-    setPage((prevPage) => prevPage + 1);
+
     setPhotos((prevPhotos: any) => [...prevPhotos, ...fetchedPhotos]);
+    setPage((prevPage) => prevPage + 1);
     setLoadingScroll(false);
   };
 
   const fetchDataSearch = async () => {
     setLoading(true);
-    const fetchedPhotos = await fetchAPI(
-      rover,
-      camera,
-      timeCriteria,
-      time,
-      page
+    setPage(1);
+    let fetchedPhotos = await fetchAPI(
+      `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/photos?${timeCriteria}=${time}${
+        camera !== "" ? `&camera=${camera}` : ""
+      }&page=${page}`
     );
-    console.log("set loading", loading);
     setPhotos(fetchedPhotos);
     setLoading(false);
   };
   const handleScroll = () => {
     const position = window.scrollY;
     setScrollPosition(position);
+
     if (
       window.innerHeight + document.documentElement.scrollTop !==
         document.documentElement.offsetHeight ||
@@ -85,13 +87,11 @@ export const Home = () => {
   useEffect(() => {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
+      console.log("cleaner");
       window.removeEventListener("scroll", handleScroll);
     };
   }, [loadingScroll]);
 
-  useEffect(() => {
-    fetchDataSearch();
-  }, []);
   return (
     <div>
       <div>
