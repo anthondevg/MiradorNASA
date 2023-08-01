@@ -26,9 +26,12 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Run Tests
 
-I decided to use Cypress to do some E2E testing please run
+I decided to use Cypress to do some E2E testing please run the dev server and then run cypress
 
 ```bash
+# run dev server
+npm run dev
+
 npm run cypress
 ```
 
