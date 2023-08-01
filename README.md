@@ -4,12 +4,13 @@ Hello Anthony here! thanks for this Opportunity at Southern Code please install 
 
 ## Getting Started
 
-First, run the development server:
-Please create .env and use this apikey:
+Please create .env if needed and use this apikey:
 
 ```bash
 Q2Q0wnRgOoN7VCBBuhQgQundpSaq57UOqyhu9tQZ
 ```
+
+then install dependencies and run the project
 
 ```bash
 npm install
